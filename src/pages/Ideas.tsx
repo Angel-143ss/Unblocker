@@ -95,7 +95,7 @@ export function Ideas() {
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
-        contents: prompt,
+        contents: [{ parts: [{ text: prompt }] }],
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -124,9 +124,9 @@ export function Ideas() {
         try {
           const imageResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image',
-            contents: {
+            contents: [{
               parts: [{ text: data.imagePrompt }]
-            },
+            }],
             config: {
               imageConfig: { aspectRatio: "1:1" }
             }
@@ -146,12 +146,20 @@ export function Ideas() {
       }
 
       setIdea(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating idea:', error);
+      const errorMessage = error?.message || '';
+      const isApiKeyError = errorMessage.includes('API_KEY_INVALID') || 
+                           errorMessage.includes('API key not found') ||
+                           errorMessage.includes('Falta la clave API') ||
+                           errorMessage.includes('Gemini API Key is missing');
+      
       setIdea({
         type: 'text',
         title: language === 'es' ? 'Error de conexión' : 'Connection error',
-        description: language === 'es' ? 'Hubo un error al generar la idea. Por favor, intenta de nuevo.' : 'There was an error generating the idea. Please try again.'
+        description: isApiKeyError 
+          ? (language === 'es' ? 'Error de configuración: No se ha configurado la clave API de Gemini en las variables de entorno.' : 'Configuration error: Gemini API Key has not been configured in environment variables.')
+          : (language === 'es' ? 'Hubo un error al generar la idea. Por favor, intenta de nuevo.' : 'There was an error generating the idea. Please try again.')
       });
     } finally {
       setLoading(false);
