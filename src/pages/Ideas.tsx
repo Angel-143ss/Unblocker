@@ -6,7 +6,6 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { useNavigate } from 'react-router-dom';
 import { translations } from '../lib/i18n';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 interface IdeaData {
   type: 'text' | 'visual';
@@ -35,6 +34,12 @@ export function Ideas() {
     setLoading(true);
     setLoadingStep(t.thinkingIdea);
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error(language === 'es' ? 'Falta la clave API de Gemini' : 'Gemini API Key is missing');
+      }
+      const ai = new GoogleGenAI({ apiKey });
+      
       const modeConfig = {
         Unlock: {
           goal: "Romper el bloqueo creativo rápidamente.",

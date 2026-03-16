@@ -94,9 +94,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addProgressNote = (note: Omit<ProgressNote, 'id' | 'date'>) => {
+    const id = typeof crypto.randomUUID === 'function' 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      
     const newNote: ProgressNote = {
       ...note,
-      id: crypto.randomUUID(),
+      id,
       date: new Date().toISOString(),
     };
     const updated = [newNote, ...progressNotes];
